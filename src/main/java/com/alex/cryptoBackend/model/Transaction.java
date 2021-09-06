@@ -3,11 +3,8 @@ package com.alex.cryptoBackend.model;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
 
 @Entity
 @Data

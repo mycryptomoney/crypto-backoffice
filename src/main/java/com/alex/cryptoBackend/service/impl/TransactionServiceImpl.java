@@ -13,7 +13,6 @@ import com.alex.cryptoBackend.repository.WalletRepository;
 import com.alex.cryptoBackend.service.TransactionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
