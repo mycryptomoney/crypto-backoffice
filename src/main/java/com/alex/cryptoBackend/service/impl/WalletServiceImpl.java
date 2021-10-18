@@ -13,11 +13,13 @@ import com.alex.cryptoBackend.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
@@ -29,6 +31,20 @@ public class WalletServiceImpl implements WalletService {
     private final static String WALLET_EXCEPTION_MESSAGE = "Wallet doesn't exists";
     private final static String MONEY_EXCEPTION = "To delete wallet amount should be zero";
     private final static String CURRENCY_EXCEPTION = "Currency with this abbreviation doesn't exists";
+
+    @Override
+    public WalletDto createInitialWallet(Long userId) {
+        final BigDecimal amount = new BigDecimal(0);
+        final String abbreviation = "USD";
+        Currency currency = currencyRepository.findByAbbreviation(abbreviation).orElseThrow(() -> new IllegalArgumentException(CURRENCY_EXCEPTION));
+        WalletDto walletDto = new WalletDto();
+        walletDto.setUserId(userId);
+        walletDto.setAmount(amount);
+        Wallet wallet = mapper.toWallet(walletDto);
+        wallet.setCurrency(currency);
+        walletRepository.save(wallet);
+        return mapper.toDto(wallet);
+    }
 
     @Override
     public WalletDto createWallet(WalletDto wallet) {

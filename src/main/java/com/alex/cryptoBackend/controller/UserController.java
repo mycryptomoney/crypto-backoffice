@@ -1,6 +1,5 @@
 package com.alex.cryptoBackend.controller;
 
-import com.alex.cryptoBackend.dto.NewUserDto;
 import com.alex.cryptoBackend.dto.TransactionDto;
 import com.alex.cryptoBackend.dto.UserDto;
 import com.alex.cryptoBackend.dto.WalletDto;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -27,9 +25,16 @@ public class UserController {
     private final WalletService walletService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllActiveUsers() {
+        List<UserDto> users = userService.getAllActiveUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
@@ -38,12 +43,6 @@ public class UserController {
     public ResponseEntity<UserDto> getUser(@PathVariable Long userId) {
         UserDto user = userService.getUserById(userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody NewUserDto newUser) {
-        UserDto user = userService.createUser(newUser);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PutMapping("/{userId}")

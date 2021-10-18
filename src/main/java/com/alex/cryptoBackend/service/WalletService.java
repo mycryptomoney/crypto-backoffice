@@ -5,6 +5,7 @@ import com.alex.cryptoBackend.dto.WalletDto;
 import java.util.List;
 
 public interface WalletService {
+    WalletDto createInitialWallet(Long userId);
     WalletDto createWallet(WalletDto wallet);
     WalletDto updateWallet(WalletDto wallet, Long id);
     WalletDto getWalletById(Long id);

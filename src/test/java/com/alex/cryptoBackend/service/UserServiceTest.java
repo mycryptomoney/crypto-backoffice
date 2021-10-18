@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,7 +42,12 @@ public class UserServiceTest {
     @MockBean
     private MapMapper mapper;
     @MockBean
+    private ConfirmationTokenService confirmationTokenService;
+    @MockBean
     private  PasswordEncoder encoder;
+    @MockBean
+    private EmailService emailService;
+    private Long expireMinutes = 20L;
 
     private final UserDto userDto1 = new UserDto();
     private final UserDto userDto2 = new UserDto();
@@ -57,7 +63,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, roleRepository, transactionRepository, walletRepository, mapper, encoder);
+        userService = new UserServiceImpl(userRepository, roleRepository, mapper, encoder, confirmationTokenService, emailService, expireMinutes);
         userDto1.setEmail("Jonny@gmail.com");
         userDto1.setId(1L);
         userDto1.setUsername("Username");
@@ -91,7 +97,7 @@ public class UserServiceTest {
         final int actualSize = 2;
         when(userRepository.findAll()).thenReturn(allUsers);
         when(mapper.toDto(anyList())).thenReturn(allUserDtos);
-        List<UserDto> actualUserDtos = userService.getAllUsers();
+        List<UserDto> actualUserDtos = userService.getAllActiveUsers();
         System.out.println(actualUserDtos.get(0));
         System.out.println(allUsers.get(0));
         verify(mapper).toDto(eq(allActiveUsers));
