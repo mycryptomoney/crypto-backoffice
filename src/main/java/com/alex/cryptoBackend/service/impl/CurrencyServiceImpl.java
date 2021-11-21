@@ -16,22 +16,20 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     private final CurrencyRepository currencyRepository;
     private final MapMapper mapper;
+
     @Override
     public List<CurrencyDto> getAllCurrencies() {
-        List<CurrencyDto> currencies = mapper.toCurrencyListDto(currencyRepository.findAll());
-        return currencies;
+        return mapper.toCurrencyListDto(currencyRepository.findAll());
     }
 
     @Override
     public CurrencyDto getCurrencyById(Long id) {
-        CurrencyDto currency = mapper.toDto(currencyRepository.findById(id).orElseThrow(IllegalArgumentException::new));
-        return currency;
+        return mapper.toDto(currencyRepository.findById(id).orElseThrow(IllegalArgumentException::new));
     }
 
     @Override
     public CurrencyDto getCurrencyByName(String name) {
-        CurrencyDto currency = mapper.toDto(currencyRepository.findByName(name).orElseThrow(IllegalArgumentException::new));
-        return currency;
+        return mapper.toDto(currencyRepository.findByName(name).orElseThrow(IllegalArgumentException::new));
     }
 
     @Override

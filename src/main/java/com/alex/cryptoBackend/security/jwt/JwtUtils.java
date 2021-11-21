@@ -2,13 +2,13 @@ package com.alex.cryptoBackend.security.jwt;
 
 import com.alex.cryptoBackend.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -20,9 +20,8 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-        String username = Objects.nonNull(userPrincipal.getUsername()) ? userPrincipal.getUsername() : userPrincipal.getEmail();
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)

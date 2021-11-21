@@ -3,7 +3,6 @@ package com.alex.cryptoBackend.service;
 import com.alex.cryptoBackend.dto.NewUserDto;
 import com.alex.cryptoBackend.dto.UserDto;
 import com.alex.cryptoBackend.mapper.MapMapper;
-import com.alex.cryptoBackend.model.ERole;
 import com.alex.cryptoBackend.model.Role;
 import com.alex.cryptoBackend.model.User;
 import com.alex.cryptoBackend.model.UserState;
@@ -17,37 +16,34 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static com.alex.cryptoBackend.exception.code.ExceptionCode.USER_EXCEPTION_MESSAGE;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
-public class UserServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
 
-    private UserService userService;
-    @MockBean
+    @InjectMocks
+    private UserServiceImpl userService;
+    @Mock
     private UserRepository userRepository;
-    @MockBean
+    @Mock
     private RoleRepository roleRepository;
-    @MockBean
+    @Mock
     private TransactionRepository transactionRepository;
-    @MockBean
+    @Mock
     private  WalletRepository walletRepository;
-    @MockBean
+    @Mock
     private MapMapper mapper;
-    @MockBean
-    private ConfirmationTokenService confirmationTokenService;
-    @MockBean
+    @Mock
     private  PasswordEncoder encoder;
-    @MockBean
-    private EmailService emailService;
-    private Long expireMinutes = 20L;
 
     private final UserDto userDto1 = new UserDto();
     private final UserDto userDto2 = new UserDto();
@@ -59,11 +55,9 @@ public class UserServiceTest {
     private List<User> allUsers;
     private List<UserDto> allUserDtos;
     private List<User> allActiveUsers;
-    private final String USER_EXCEPTION_MESSAGE = "User doesn't exist";
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, roleRepository, mapper, encoder, confirmationTokenService, emailService, expireMinutes);
         userDto1.setEmail("Jonny@gmail.com");
         userDto1.setId(1L);
         userDto1.setUsername("Username");
@@ -97,7 +91,7 @@ public class UserServiceTest {
         final int actualSize = 2;
         when(userRepository.findAll()).thenReturn(allUsers);
         when(mapper.toDto(anyList())).thenReturn(allUserDtos);
-        List<UserDto> actualUserDtos = userService.getAllActiveUsers();
+        List<UserDto> actualUserDtos = userService.getAllUsers();
         System.out.println(actualUserDtos.get(0));
         System.out.println(allUsers.get(0));
         verify(mapper).toDto(eq(allActiveUsers));
@@ -121,7 +115,7 @@ public class UserServiceTest {
         when(userRepository.findById(nonActual)).thenReturn(Optional.empty());
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() ->  userService.getUserById(nonActual))
-                .withMessage(USER_EXCEPTION_MESSAGE);
+                .withMessage(USER_EXCEPTION_MESSAGE.name());
     }
 
     @Test
@@ -130,7 +124,7 @@ public class UserServiceTest {
         when(userRepository.findById(actual)).thenReturn(Optional.of(user3));
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() ->  userService.getUserById(actual))
-                .withMessage(USER_EXCEPTION_MESSAGE);
+                .withMessage(USER_EXCEPTION_MESSAGE.name());
     }
 
     @Test
@@ -148,7 +142,7 @@ public class UserServiceTest {
         when(userRepository.findById(nonActual)).thenReturn(Optional.empty());
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() ->  userService.deleteUserById(nonActual))
-                .withMessage(USER_EXCEPTION_MESSAGE);
+                .withMessage(USER_EXCEPTION_MESSAGE.name());
     }
 
     @Test
@@ -161,8 +155,6 @@ public class UserServiceTest {
         newUser.setEmail(userEmail);
         UserDto expectedUserDto = new UserDto();
         expectedUserDto.setEmail(userEmail);
-        when(roleRepository.findByName(ERole.ROLE_USER)).thenReturn(Optional.of(user));
-        when(roleRepository.findByName(ERole.ROLE_ADMIN)).thenReturn(Optional.of(admin));
         when(mapper.toUser(eq(newUserDto))).thenReturn(newUser);
         when(mapper.toDto(eq(newUser))).thenReturn(expectedUserDto);
         UserDto actualUserDto = userService.createUser(newUserDto);
@@ -193,7 +185,7 @@ public class UserServiceTest {
         when(userRepository.findById(nonActual)).thenReturn(Optional.empty());
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() ->  userService.updateUser(userDto1, nonActual))
-                .withMessage(USER_EXCEPTION_MESSAGE);
+                .withMessage(USER_EXCEPTION_MESSAGE.name());
     }
 
 }
