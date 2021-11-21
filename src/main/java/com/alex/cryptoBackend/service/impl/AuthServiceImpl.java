@@ -8,7 +8,7 @@ import com.alex.cryptoBackend.service.AuthService;
 import com.alex.cryptoBackend.service.ConfirmationTokenService;
 import com.alex.cryptoBackend.service.UserService;
 import com.alex.cryptoBackend.service.WalletService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,8 +19,10 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static com.alex.cryptoBackend.exception.code.AlertCode.*;
+
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Transactional
 public class AuthServiceImpl implements AuthService {
 
@@ -30,14 +32,11 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationTokenService confirmationTokenService;
     private final JwtUtils jwtUtils;
 
-    private final static String SUCCESSFUL_REGISTRATION = "User have successfully registered!";
-    private final static String FROZEN_USER = "You need to confirm your email!";
-
     @Override
     public JwtResponse authenticate(UserLoginDto loginRequest) {
         boolean isUserFrozen = userService.isUserFrozen(loginRequest.getUsername());
         if (isUserFrozen) {
-            throw new IllegalArgumentException(FROZEN_USER);
+            throw new IllegalArgumentException(FROZEN_USER.name());
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -51,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
         UserDto user = userService.createInitialUser(registerRequest);
         walletService.createInitialWallet(user.getId());
         return RegisterResponse.builder()
-                .message(SUCCESSFUL_REGISTRATION)
+                .message(SUCCESSFUL_REGISTRATION.name())
                 .username(user.getUsername())
                 .build();
     }
@@ -61,19 +60,19 @@ public class AuthServiceImpl implements AuthService {
     public ConfirmTokenResponse confirmToken(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService
                 .getToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token not found"));
+                .orElseThrow(() -> new IllegalArgumentException(TOKEN_NOT_FOUND.name()));
         if (Objects.nonNull(confirmationToken.getConfirmedAt())) {
-            throw new IllegalArgumentException("Email already confirmed");
+            throw new IllegalArgumentException(EMAIL_ALREADY_CONFIRMED.name());
         }
         final LocalDateTime expiredAt = confirmationToken.getExpiredAt();
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Token expired");
+            throw new IllegalArgumentException(TOKEN_EXPIRED.name());
         }
         final User user = confirmationToken.getUser();
         confirmationTokenService.setConfirmedAt(token);
         userService.enableUser(user.getEmail());
         return ConfirmTokenResponse.builder()
-                .response("Successful confirmed")
+                .response(TOKEN_SUCCESSFULLY_CONFIRMED.name())
                 .username(user.getUsername())
                 .build();
     }

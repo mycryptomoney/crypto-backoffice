@@ -6,7 +6,6 @@ import com.alex.cryptoBackend.model.User;
 import com.alex.cryptoBackend.service.EmailService;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
