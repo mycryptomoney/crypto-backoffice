@@ -3,14 +3,14 @@ package com.alex.cryptoBackend.service.impl;
 import com.alex.cryptoBackend.model.ConfirmationToken;
 import com.alex.cryptoBackend.repository.ConfirmationTokenRepository;
 import com.alex.cryptoBackend.service.ConfirmationTokenService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
 
     private final ConfirmationTokenRepository confirmationTokenRepository;

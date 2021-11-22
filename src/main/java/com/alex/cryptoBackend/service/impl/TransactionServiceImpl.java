@@ -26,6 +26,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.alex.cryptoBackend.exception.code.AlertCode.*;
+
 @AllArgsConstructor
 @Service
 @Slf4j
@@ -44,13 +46,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionDto getTransactionById(Long id) {
-        return mapper.toDto(transactionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction with id " + id + " doesn't exist")));
+        return mapper.toDto(transactionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(TRANSACTION_NOT_EXISTS.name())));
 
     }
 
     @Override
     public List<TransactionDto> getTransactionsByWalletPositivePeriod(Long walletId, LocalDate start, LocalDate end) {
-        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
+        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         final Predicate<Transaction> predicate = transaction -> transaction.getTime().isAfter(ChronoLocalDateTime.from(start)) && transaction.getTime().isBefore(ChronoLocalDateTime.from(end));
         List<TransactionDto> transactionsReceived = mapper.toTransactionDtoList(transactionRepository.findByReceiver(wallet).stream()
                 .filter(predicate)
@@ -60,7 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionDto> getTransactionsByWalletNegativePeriod(Long walletId, LocalDate start, LocalDate end) {
-        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
+        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         final Predicate<Transaction> predicate = transaction -> transaction.getTime().isAfter(ChronoLocalDateTime.from(start)) && transaction.getTime().isBefore(ChronoLocalDateTime.from(end));
         List<TransactionDto> transactionsSend = mapper.toTransactionDtoList(transactionRepository.findBySender(wallet).stream()
                 .filter(predicate)
@@ -80,7 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionDto> getAllWalletsTransactions(Long walletId) {
-        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
+        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         return getTransactionDtos(wallet);
     }
 
@@ -88,7 +90,7 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionDto> getAllWalletsTransactionsByUserAndCurrency(Long userId, String abbreviation) {
         User user = userRepository.findById(userId).orElseThrow();
         Currency currency = currencyRepository.findByAbbreviation(abbreviation).orElseThrow();
-        Wallet wallet = walletRepository.findByUserAndCurrency(user, currency).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
+        Wallet wallet = walletRepository.findByUserAndCurrency(user, currency).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         return getTransactionDtos(wallet);
     }
 
@@ -112,24 +114,24 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransactionDto executeTransactionWithWallets(Long senderId, Long receiverId, BigDecimal amount) {
-        Wallet sender = walletRepository.findById(senderId).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
-        Wallet receiver = walletRepository.findById(receiverId).orElseThrow(() -> new IllegalArgumentException("Wallet doesn't exist"));
+        Wallet sender = walletRepository.findById(senderId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
+        Wallet receiver = walletRepository.findById(receiverId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         return getTransactionDto(amount, sender, receiver);
     }
 
     @Override
     @Transactional
     public TransactionDto executeTransactionUsers(Long walletSenderId, Long userReceiverId, BigDecimal amount) {
-        Wallet senderWallet = walletRepository.findById(walletSenderId).orElseThrow(() -> new IllegalArgumentException("No such a wallet"));
+        Wallet senderWallet = walletRepository.findById(walletSenderId).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         User receiverUser = userRepository.findById(userReceiverId).orElseThrow();
-        Wallet receiverWallet = walletRepository.findByUserAndCurrency(receiverUser, senderWallet.getCurrency()).orElseThrow(() -> new IllegalArgumentException("No such a wallet for this user"));
+        Wallet receiverWallet = walletRepository.findByUserAndCurrency(receiverUser, senderWallet.getCurrency()).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         return getTransactionDto(amount, senderWallet, receiverWallet);
     }
 
     @Override
     public TransactionDto executeTransactionUsersCurrency(Long userSenderId, String currencyAbbreviation, Long userReceiverId, BigDecimal amount) {
-        Wallet sender = walletRepository.findWalletByUserIdAndCurrencyAbbreviation(userSenderId, currencyAbbreviation).orElseThrow(() -> new IllegalArgumentException("Invalid operation"));
-        Wallet receiver = walletRepository.findWalletByUserIdAndCurrencyAbbreviation(userReceiverId, currencyAbbreviation).orElseThrow(() -> new IllegalArgumentException("No such a wallet"));
+        Wallet sender = walletRepository.findWalletByUserIdAndCurrencyAbbreviation(userSenderId, currencyAbbreviation).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
+        Wallet receiver = walletRepository.findWalletByUserIdAndCurrencyAbbreviation(userReceiverId, currencyAbbreviation).orElseThrow(() -> new IllegalArgumentException(WALLET_NOT_EXISTS.name()));
         return getTransactionDto(amount, sender, receiver);
     }
 
@@ -138,8 +140,8 @@ public class TransactionServiceImpl implements TransactionService {
             senderWallet.setAmount(senderWallet.getAmount().subtract(amount));
             receiverWallet.setAmount(receiverWallet.getAmount().add(amount));
         } else {
-            log.error("Not enough money");
-            throw new IllegalArgumentException("Not enough money");
+            log.error(INVALID_WALLET_AMOUNT_TO_DELETE.toString());
+            throw new IllegalArgumentException(INVALID_WALLET_AMOUNT_TO_DELETE.name());
         }
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);

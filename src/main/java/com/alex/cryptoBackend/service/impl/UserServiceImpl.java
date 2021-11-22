@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.alex.cryptoBackend.exception.code.AlertCode.*;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -35,10 +37,6 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     @Value("${token.expire.minutes}")
     private final long expireMinutesLimit;
-    private final static String USER_EXCEPTION_MESSAGE = "User doesn't exist";
-    private final static String ROLE_EXCEPTION_MESSAGE = "Role doesn't exist";
-    private final static String EMAIL_EXIST_EXCEPTION = "Email already exist";
-    private final static String USERNAME_EXIST_EXCEPTION = "Username already exist";
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -58,13 +56,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long id) {
-        User user = userRepository.findById(id).filter(thisUser -> thisUser.getState() == UserState.ACTIVE).orElseThrow(() -> new IllegalArgumentException(USER_EXCEPTION_MESSAGE));
+        User user = userRepository.findById(id).filter(thisUser -> thisUser.getState() == UserState.ACTIVE).orElseThrow(() -> new IllegalArgumentException(USER_NOT_EXISTS.name()));
         return mapper.toDto(user);
     }
 
     @Override
     public void deleteUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(USER_EXCEPTION_MESSAGE));
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(USER_NOT_EXISTS.name()));
         user.setState(UserState.DELETED);
         userRepository.save(user);
     }
@@ -73,7 +71,7 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(NewUserDto newUser) {
         User user = mapper.toUser(newUser);
         Set<Role> roles = new HashSet<>();
-        Role role1 = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new IllegalArgumentException(ROLE_EXCEPTION_MESSAGE));
+        Role role1 = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new IllegalArgumentException(ROLE_NOT_EXISTS.name()));
         roles.add(role1);
         user.setPassword(encoder.encode(user.getPassword()));
         user.setRoles(roles);
@@ -83,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto user, Long id) {
-        userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(USER_EXCEPTION_MESSAGE));
+        userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(USER_NOT_EXISTS.name()));
         user.setId(id);
         User updatedUser = mapper.toUser(user);
         userRepository.save(updatedUser);
@@ -96,15 +94,15 @@ public class UserServiceImpl implements UserService {
         boolean usernameExist = userRepository.findByUsername(registerRequest.getUsername()).isPresent();
         boolean emailExist = userRepository.findByEmail(registerRequest.getEmail()).isPresent();
         if (emailExist) {
-            throw new IllegalArgumentException(EMAIL_EXIST_EXCEPTION);
+            throw new IllegalArgumentException(EMAIL_ALREADY_EXISTS.name());
         }
         if (usernameExist) {
-            throw new IllegalArgumentException(USERNAME_EXIST_EXCEPTION);
+            throw new IllegalArgumentException(USERNAME_ALREADY_EXISTS.name());
         }
         User newUser = mapper.toUser(registerRequest);
         String encodedPassword = encoder.encode(registerRequest.getPassword());
         newUser.setPassword(encodedPassword);
-        Role role = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new IllegalArgumentException(ROLE_EXCEPTION_MESSAGE));
+        Role role = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new IllegalArgumentException(ROLE_NOT_EXISTS.name()));
         newUser.getRoles().add(role);
         newUser.setState(UserState.FROZEN);
         userRepository.save(newUser);
@@ -122,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean isUserFrozen(String username) {
-        User user = userRepository.findByUsernameOrEmail(username).orElseThrow(() -> new IllegalArgumentException(USER_EXCEPTION_MESSAGE));
+        User user = userRepository.findByUsernameOrEmail(username).orElseThrow(() -> new IllegalArgumentException(USER_NOT_EXISTS.name()));
         return user.getState() == UserState.FROZEN;
     }
 

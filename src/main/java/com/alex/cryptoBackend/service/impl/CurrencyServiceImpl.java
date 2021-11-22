@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.alex.cryptoBackend.exception.code.AlertCode.CURRENCY_NOT_EXISTS;
+
 @Service
 @RequiredArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
@@ -24,13 +26,13 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public CurrencyDto getCurrencyById(Long id) {
-        CurrencyDto currency = mapper.toDto(currencyRepository.findById(id).orElseThrow(IllegalArgumentException::new));
+        CurrencyDto currency = mapper.toDto(currencyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_EXISTS.name())));
         return currency;
     }
 
     @Override
     public CurrencyDto getCurrencyByName(String name) {
-        CurrencyDto currency = mapper.toDto(currencyRepository.findByName(name).orElseThrow(IllegalArgumentException::new));
+        CurrencyDto currency = mapper.toDto(currencyRepository.findByName(name).orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_EXISTS.name())));
         return currency;
     }
 
@@ -43,7 +45,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public CurrencyDto updateCurrency(CurrencyDto currencyDto, Long id) {
-        currencyRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        currencyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_EXISTS.name()));
         currencyDto.setId(id);
         Currency updatedCurrency = mapper.toCurrency(currencyDto);
         currencyRepository.save(updatedCurrency);
