@@ -35,8 +35,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
+
     @Value("${token.expire.minutes}")
-    private final long expireMinutesLimit;
+    private final long expireMinutesLimit = 20L;
 
     @Override
     public List<UserDto> getAllUsers() {

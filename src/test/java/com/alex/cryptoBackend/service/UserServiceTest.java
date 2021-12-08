@@ -61,7 +61,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, roleRepository, mapper, encoder, confirmationTokenService, emailService, expiredMinutes);
+        userService = new UserServiceImpl(userRepository, roleRepository, mapper, encoder, confirmationTokenService, emailService);
         userDto1.setEmail("Jonny@gmail.com");
         userDto1.setId(1L);
         userDto1.setUsername("Username");

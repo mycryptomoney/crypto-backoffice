@@ -4,23 +4,20 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class Currency {
+public class Purchase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
-    private String name;
-    @Column(nullable = false, unique = true)
-    private String abbreviation;
+    @ManyToOne
+    private Wallet wallet;
     @Column(nullable = false)
-    private BigDecimal value;
+    private LocalDateTime time;
     @Column(nullable = false)
-    private Boolean activated;
+    private BigDecimal amount;
     @Column(nullable = false)
-    private BigDecimal capitalisation;
-    @Lob
-    private Byte[] image;
+    private BigDecimal price;
 }

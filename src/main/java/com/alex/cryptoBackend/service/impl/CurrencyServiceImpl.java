@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.alex.cryptoBackend.exception.code.AlertCode.CURRENCY_IS_NOT_ACTIVATED;
 import static com.alex.cryptoBackend.exception.code.AlertCode.CURRENCY_NOT_EXISTS;
 
 @Service
@@ -27,6 +28,9 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public CurrencyDto getCurrencyById(Long id) {
         CurrencyDto currency = mapper.toDto(currencyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(CURRENCY_NOT_EXISTS.name())));
+        if (currency.getActivated()) {
+            throw new IllegalArgumentException(CURRENCY_IS_NOT_ACTIVATED.name());
+        }
         return currency;
     }
 

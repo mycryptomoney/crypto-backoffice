@@ -16,7 +16,8 @@ public enum AlertCode {
     TOKEN_EXPIRED("Confirmation token expired"),
     TOKEN_SUCCESSFULLY_CONFIRMED("Token is successfully confirmed"),
     USERNAME_ALREADY_EXISTS("Username already exists"),
-    EMAIL_ALREADY_EXISTS("Email already exists");
+    EMAIL_ALREADY_EXISTS("Email already exists"),
+    CURRENCY_IS_NOT_ACTIVATED("Currency is not activated yet");
 
     private final String message;
 

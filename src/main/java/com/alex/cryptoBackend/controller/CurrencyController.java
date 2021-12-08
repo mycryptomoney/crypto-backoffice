@@ -14,7 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/currencies")
 public class CurrencyController {
+
     private final CurrencyService currencyService;
+
     @GetMapping
     public ResponseEntity<List<CurrencyDto>> getCurrencies() {
         List<CurrencyDto> currencies = currencyService.getAllCurrencies();

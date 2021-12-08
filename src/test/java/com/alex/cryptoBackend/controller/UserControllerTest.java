@@ -1,6 +1,6 @@
 package com.alex.cryptoBackend.controller;
 
-import com.alex.cryptoBackend.CryptoBackendApplication;
+import com.alex.cryptoBackend.CryptoBackoffice;
 import com.alex.cryptoBackend.dto.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = CryptoBackendApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = CryptoBackoffice.class)
 @AutoConfigureMockMvc
 @WebAppConfiguration
 @RequiredArgsConstructor

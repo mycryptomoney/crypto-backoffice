@@ -37,6 +37,11 @@ public abstract class MapMapper {
     @Mapping(target = "userId", expression = "java(wallet.getUser().getId())")
     public abstract WalletDto toDto(Wallet wallet);
     public abstract Set<WalletDto> walletDtoSet(Set<Wallet> wallets);
+
+    @Mapping(target = "walletId", expression = "java(purchase.getWallet().getId())")
+    public abstract PurchaseDto toDto(Purchase purchase);
+    public abstract List<PurchaseDto> toPurchaseDtoList(List<Purchase> purchases);
+
     public abstract UserDto toDto(User user);
     public abstract List<UserDto> toDto(List<User> users);
 
